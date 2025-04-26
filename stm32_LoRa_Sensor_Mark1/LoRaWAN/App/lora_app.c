@@ -498,42 +498,27 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
-  LmHandlerErrorStatus_t status = LORAMAC_HANDLER_ERROR;
-  UTIL_TIMER_Time_t nextTxIn = 0;
+  LmHandlerErrorStatus_t status;
 
-  // ตั้งค่า AppData สำหรับส่ง (ไม่มีข้อมูลส่ง)
+
   AppData.Port = LORAWAN_USER_APP_PORT;
   AppData.BufferSize = 0;
   AppData.Buffer = NULL;
 
-  if ((JoinLedTimer.IsRunning) && (LmHandlerJoinStatus() == LORAMAC_HANDLER_SET))
-  {
-    UTIL_TIMER_Stop(&JoinLedTimer);
-  }
 
-  status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, false);
+  status = LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
 
   if (status == LORAMAC_HANDLER_SUCCESS)
   {
     APP_LOG(TS_ON, VLEVEL_L, "SEND EMPTY REQUEST SUCCESS\r\n");
   }
-  else if (status == LORAMAC_HANDLER_DUTYCYCLE_RESTRICTED)
+  else
   {
-    nextTxIn = LmHandlerGetDutyCycleWaitTime();
-    if (nextTxIn > 0)
-    {
-      APP_LOG(TS_ON, VLEVEL_L, "Next Tx in  : ~%ld second(s)\r\n", (nextTxIn / 1000));
-    }
-  }
-
-  if (EventType == TX_ON_TIMER)
-  {
-    UTIL_TIMER_Stop(&TxTimer);
-    UTIL_TIMER_SetPeriod(&TxTimer, MAX(nextTxIn, TxPeriodicity));
-    UTIL_TIMER_Start(&TxTimer);
+    APP_LOG(TS_ON, VLEVEL_L, "SEND EMPTY REQUEST FAILED\r\n");
   }
   /* USER CODE END SendTxData_1 */
 }
+
 
 
 static void OnTxTimerEvent(void *context)

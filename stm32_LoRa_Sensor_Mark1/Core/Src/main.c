@@ -177,25 +177,29 @@ void PumpStateMachine(PumpState_t state)
 
 	  case STATE_PUMP_ON:
 	  {
-		static bool triggeredOn = false;
-		static uint32_t startOnTime = 0;
+	      static bool triggeredOn = false;
+	      static uint32_t startOnTime = 0;
 
-		if (!triggeredOn)
-		{
-		  APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-		  startOnTime = HAL_GetTick();
-		  triggeredOn = true;
-		}
+	      if (!triggeredOn)
+	      {
+	          APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
+	          HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+	          startOnTime = HAL_GetTick();
+	          triggeredOn = true;
+	      }
+	      else
+	      {
+	          if ((HAL_GetTick() - startOnTime) >= 1000)
+	          {
+	              HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+	              APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: ครบ 10 วิ ปิดปั๊มแล้ว\r\n");
+	              triggeredOn = false;
+	          }
+	      }
 
-		if ((HAL_GetTick() - startOnTime) >= 10000)
-		{
-		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-		  triggeredOn = false;
-		}
-
-		break;
+	      break;
 	  }
+
 
 
 	  case STATE_PUMP_OFF:
@@ -205,20 +209,23 @@ void PumpStateMachine(PumpState_t state)
 
 	      if (!triggeredOff)
 	      {
-	          APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF \r\n");
+	          APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
 	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
 	          startOffTime = HAL_GetTick();
 	          triggeredOff = true;
 	      }
-
-	      if ((HAL_GetTick() - startOffTime) >= 10000)
+	      else
 	      {
-	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-	          APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบเวลา 1 วิ ปิดปั๊ม OFF แล้ว\r\n");
-	          triggeredOff = false;
+	          if ((HAL_GetTick() - startOffTime) >= 1000)
+	          {
+	              HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+	              APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบเวลา 10 วิ ปิดปั๊มแล้ว\r\n");
+	              triggeredOff = false;
+	          }
 	      }
 	      break;
 	  }
+
 
 
 	case STATE_AUTO:
