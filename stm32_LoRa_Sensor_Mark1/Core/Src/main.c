@@ -107,6 +107,7 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
 
@@ -204,6 +205,7 @@ void PumpStateMachine(PumpState_t state,uint8_t duration)
 
 	  case STATE_AUTO:
 	  {
+		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
 	      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
 	      APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: เปิดปั๊ม (เวลา %d นาที)\r\n", duration);
 	      HAL_Delay(1000);
@@ -214,6 +216,7 @@ void PumpStateMachine(PumpState_t state,uint8_t duration)
 	      APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ครบเวลา ปิดปั๊มแล้ว\r\n");
 	      HAL_Delay(1000);
 	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
 	      break;
 	  }
 
