@@ -593,7 +593,6 @@ static void OnJoinRequest(LmHandlerJoinParams_t *joinParams)
 	{
 	    APP_LOG(TS_OFF, VLEVEL_M, "Join Success -> Switching to Class C and Halt\r\n");
 	    LmHandlerRequestClass(CLASS_C);    // บังคับเปลี่ยนเป็น Class C
-	    LmHandlerHalt();                   // หยุดส่ง uplink ทั้งหมด
 	}
 
   /* USER CODE END OnJoinRequest_1 */
