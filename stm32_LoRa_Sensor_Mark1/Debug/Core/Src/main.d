@@ -40,11 +40,12 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal_uart_ex.h \
  ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_ll_system.h \
  ../LoRaWAN/App/app_lorawan.h ../Core/Inc/usart.h ../Core/Inc/main.h \
- ../Core/Inc/gpio.h ../Core/Inc/pump_state.h ../Core/Inc/sys_app.h \
- ../Core/Inc/sys_conf.h ../Utilities/trace/adv_trace/stm32_adv_trace.h \
- ../Core/Inc/utilities_conf.h ../Drivers/CMSIS/Include/cmsis_compiler.h \
+ ../Core/Inc/gpio.h ../Utilities/timer/stm32_timer.h \
+ ../Drivers/CMSIS/Include/cmsis_compiler.h ../Core/Inc/utilities_conf.h \
  ../Utilities/misc/stm32_mem.h ../Utilities/misc/stm32_tiny_vsnprintf.h \
- ../Core/Inc/utilities_def.h
+ ../Core/Inc/utilities_def.h ../Core/Inc/pump_state.h \
+ ../Core/Inc/sys_app.h ../Core/Inc/sys_conf.h \
+ ../Utilities/trace/adv_trace/stm32_adv_trace.h
 ../Core/Inc/main.h:
 ../Drivers/STM32WLxx_HAL_Driver/Inc/stm32wlxx_hal.h:
 ../Core/Inc/stm32wlxx_hal_conf.h:
@@ -90,12 +91,13 @@ Core/Src/main.o: ../Core/Src/main.c ../Core/Inc/main.h \
 ../Core/Inc/usart.h:
 ../Core/Inc/main.h:
 ../Core/Inc/gpio.h:
+../Utilities/timer/stm32_timer.h:
+../Drivers/CMSIS/Include/cmsis_compiler.h:
+../Core/Inc/utilities_conf.h:
+../Utilities/misc/stm32_mem.h:
+../Utilities/misc/stm32_tiny_vsnprintf.h:
+../Core/Inc/utilities_def.h:
 ../Core/Inc/pump_state.h:
 ../Core/Inc/sys_app.h:
 ../Core/Inc/sys_conf.h:
 ../Utilities/trace/adv_trace/stm32_adv_trace.h:
-../Core/Inc/utilities_conf.h:
-../Drivers/CMSIS/Include/cmsis_compiler.h:
-../Utilities/misc/stm32_mem.h:
-../Utilities/misc/stm32_tiny_vsnprintf.h:
-../Core/Inc/utilities_def.h:

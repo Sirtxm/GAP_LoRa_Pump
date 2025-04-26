@@ -459,31 +459,27 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
     uint8_t command = appData->Buffer[0];
     uint8_t duration = appData->Buffer[1];
 
-    if (appData->BufferSize >= 2)
-    {
-      duration = appData->Buffer[1];  // ดึงค่าระยะเวลา (กรณี AUTO)
-    }
 
     switch (command)
     {
       case 0x01:  // Pump ON
         APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
         pumpState = STATE_PUMP_ON;
-        PumpStateMachine(pumpState);
+        PumpStateMachine(pumpState, 0);
         break;
 
       case 0x02:  // Pump AUTO
         APP_LOG(TS_ON, VLEVEL_M, "Command 0x02: Pump AUTO\r\n");
-        durationMinutes = duration;  // เก็บ duration ลงตัวแปรกลาง
+        durationMinutes = duration;
         APP_LOG(TS_ON, VLEVEL_M, "Duration: %d minute(s)\r\n", durationMinutes);
         pumpState = STATE_AUTO;
-        PumpStateMachine(pumpState);
+        PumpStateMachine(pumpState,durationMinutes);
         break;
 
       case 0x03:  // Pump OFF
         APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
         pumpState = STATE_PUMP_OFF;
-        PumpStateMachine(pumpState);
+        PumpStateMachine(pumpState, 0);
         break;
 
       default:
@@ -593,15 +589,13 @@ static void OnTxData(LmHandlerTxParams_t *params)
 static void OnJoinRequest(LmHandlerJoinParams_t *joinParams)
 {
   /* USER CODE BEGIN OnJoinRequest_1 */
+	if (joinParams->Status == LORAMAC_HANDLER_SUCCESS)
 	{
-	  if (joinParams->Status == LORAMAC_HANDLER_SUCCESS)
-	  {
-	    // Switch to Class C immediately after successful join
-	    LmHandlerRequestClass(CLASS_C);
-
-	    APP_LOG(TS_OFF, VLEVEL_M, "Force switch to CLASS_C after Join Success\r\n");
-	  }
+	    APP_LOG(TS_OFF, VLEVEL_M, "Join Success -> Switching to Class C and Halt\r\n");
+	    LmHandlerRequestClass(CLASS_C);    // บังคับเปลี่ยนเป็น Class C
+	    LmHandlerHalt();                   // หยุดส่ง uplink ทั้งหมด
 	}
+
   /* USER CODE END OnJoinRequest_1 */
 }
 

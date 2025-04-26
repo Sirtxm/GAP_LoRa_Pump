@@ -14,6 +14,6 @@ extern PumpState_t pumpState;
 extern uint8_t statePump;
 extern uint8_t durationMinutes;
 
-void PumpStateMachine(PumpState_t state);
+void PumpStateMachine(PumpState_t state,uint8_t duration);
 
 #endif /* __PUMP_STATE_H */
