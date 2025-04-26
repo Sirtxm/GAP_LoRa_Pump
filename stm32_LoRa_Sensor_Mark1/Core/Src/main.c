@@ -103,9 +103,9 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-    /* USER CODE END WHILE */
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+    /* USER CODE END WHILE */
     MX_LoRaWAN_Process();
 
 
@@ -188,7 +188,7 @@ void PumpStateMachine(PumpState_t state)
 		  triggeredOn = true;
 		}
 
-		if ((HAL_GetTick() - startOnTime) >= 1000)
+		if ((HAL_GetTick() - startOnTime) >= 10000)
 		{
 		  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 		  triggeredOn = false;
@@ -211,7 +211,7 @@ void PumpStateMachine(PumpState_t state)
 	          triggeredOff = true;
 	      }
 
-	      if ((HAL_GetTick() - startOffTime) >= 1000)
+	      if ((HAL_GetTick() - startOffTime) >= 10000)
 	      {
 	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
 	          APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบเวลา 1 วิ ปิดปั๊ม OFF แล้ว\r\n");
