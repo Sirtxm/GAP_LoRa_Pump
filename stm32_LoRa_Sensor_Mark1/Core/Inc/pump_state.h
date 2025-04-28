@@ -3,7 +3,7 @@
 
 // ประกาศ Enum สำหรับสถานะต่าง ๆ
 typedef enum {
-//  STATE_IDLE,
+  STATE_IDLE,
   STATE_PUMP_ON,
   STATE_AUTO,
   STATE_PUMP_OFF

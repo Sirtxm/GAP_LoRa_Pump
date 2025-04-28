@@ -492,7 +492,7 @@ static void CurrentSensorCallback(void *context)
             AppData.BufferSize = 1;
             AppDataBuffer[0] = 0x01; // Pump ON
             AppData.Buffer = AppDataBuffer;
-
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
             currentDetected = true;
         }
         else
