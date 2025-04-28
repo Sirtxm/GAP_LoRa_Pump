@@ -925,4 +925,3 @@ static void OnRestoreContextRequest(void *nvm, uint32_t nvm_size)
 
   /* USER CODE END OnRestoreContextRequest_Last */
 }
-
