@@ -331,6 +331,8 @@ static UTIL_TIMER_Object_t RxLedTimer;
   */
 static UTIL_TIMER_Object_t JoinLedTimer;
 
+static UTIL_TIMER_Object_t CurrentSensorTimer;
+static bool currentDetected = false;
 /* USER CODE END PV */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -403,7 +405,8 @@ void LoRaWAN_Init(void)
 
   /* USER CODE BEGIN LoRaWAN_Init_2 */
   UTIL_TIMER_Start(&JoinLedTimer);
-
+  UTIL_TIMER_Create(&CurrentSensorTimer, 500, UTIL_TIMER_ONESHOT, CurrentSensorCallback, NULL);
+  UTIL_TIMER_Start(&CurrentSensorTimer);
   /* USER CODE END LoRaWAN_Init_2 */
 
   LmHandlerJoin(ActivationType, ForceRejoin);
@@ -444,6 +447,46 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
+static void CurrentSensorCallback(void *contex)
+{
+	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
+
+	if(pinState == GPIO_PIN_SET)
+	{
+		if(!currentDetected)
+		{
+			APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
+
+			AppData.Port = LORA_USER_APP_PORT;
+			AppData.BufferSize = 1;
+			AppDataBuffer[0] = 0x01;
+			AppData.Buffer = AppDataBuffer;
+
+			LmHandlerSend(&AppData, LORAWAN_DEFAULT_COMFIRMED_MSG_STATE, false);
+
+			currentDetected = true;
+		}
+	}
+	else
+	{
+		if(currentDetected)
+		{
+			APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
+
+			AppData.port = LORA_USER_APP_PORT;
+			AppData.BufferSize = 1;
+			AppDataBuffer[0] = 0x00;
+			AppData.Buffer = AppDataBuffer;
+
+			LmHandlerSend(&AppData, LORAWAN_DEFAULT_COMFIRMED_MSG_STATE, false);
+
+			currentDetected = false;
+		}
+
+	}
+	UTIL_TIMER_Start(&CurrentSensorTimer);
+
+}
 /* USER CODE END PB_Callbacks */
 
 /* Private functions ---------------------------------------------------------*/
