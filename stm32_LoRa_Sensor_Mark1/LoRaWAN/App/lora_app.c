@@ -580,7 +580,7 @@ static void SendTxData(void)
 	    return;
 	  }
 
-	  status = LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+	  status = LmHandlerSend(&AppData, LmHandlerParams.IsTxConfirmed, false);
 
 	  if (status == LORAMAC_HANDLER_SUCCESS)
 	  {
