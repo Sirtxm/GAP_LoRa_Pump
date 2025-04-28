@@ -2636,151 +2636,149 @@ void MX_GPIO_Init(void)
  8001742:	f7ff ffd5 	bl	80016f0 <LL_AHB2_GRP1_EnableClock>
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15|DBG3_Pin|DBG4_Pin|GPIO_PIN_9
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15|DBG3_Pin|DBG4_Pin|GPIO_PIN_9, GPIO_PIN_RESET);
  8001746:	2200      	movs	r2, #0
- 8001748:	f248 6118 	movw	r1, #34328	@ 0x8618
+ 8001748:	f248 2118 	movw	r1, #33304	@ 0x8218
  800174c:	4836      	ldr	r0, [pc, #216]	@ (8001828 <MX_GPIO_Init+0x108>)
  800174e:	f003 ff2e 	bl	80055ae <HAL_GPIO_WritePin>
-                          |DBG2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+  HAL_GPIO_WritePin(GPIOB, LED2_Pin|DBG2_Pin, GPIO_PIN_SET);
  8001752:	2201      	movs	r2, #1
- 8001754:	2120      	movs	r1, #32
- 8001756:	4834      	ldr	r0, [pc, #208]	@ (8001828 <MX_GPIO_Init+0x108>)
- 8001758:	f003 ff29 	bl	80055ae <HAL_GPIO_WritePin>
+ 8001754:	f44f 6184 	mov.w	r1, #1056	@ 0x420
+ 8001758:	4833      	ldr	r0, [pc, #204]	@ (8001828 <MX_GPIO_Init+0x108>)
+ 800175a:	f003 ff28 	bl	80055ae <HAL_GPIO_WritePin>
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, DBG1_Pin|GPIO_PIN_9|RF_CTRL1_Pin|RF_CTRL2_Pin, GPIO_PIN_RESET);
- 800175c:	2200      	movs	r2, #0
- 800175e:	f240 2131 	movw	r1, #561	@ 0x231
- 8001762:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
- 8001766:	f003 ff22 	bl	80055ae <HAL_GPIO_WritePin>
+ 800175e:	2200      	movs	r2, #0
+ 8001760:	f240 2131 	movw	r1, #561	@ 0x231
+ 8001764:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
+ 8001768:	f003 ff21 	bl	80055ae <HAL_GPIO_WritePin>
 
   /*Configure GPIO pins : PB15 PB9 */
   GPIO_InitStruct.Pin = GPIO_PIN_15|GPIO_PIN_9;
- 800176a:	f44f 4302 	mov.w	r3, #33280	@ 0x8200
- 800176e:	607b      	str	r3, [r7, #4]
+ 800176c:	f44f 4302 	mov.w	r3, #33280	@ 0x8200
+ 8001770:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 8001770:	2301      	movs	r3, #1
- 8001772:	60bb      	str	r3, [r7, #8]
+ 8001772:	2301      	movs	r3, #1
+ 8001774:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8001774:	2300      	movs	r3, #0
- 8001776:	60fb      	str	r3, [r7, #12]
+ 8001776:	2300      	movs	r3, #0
+ 8001778:	60fb      	str	r3, [r7, #12]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- 8001778:	2300      	movs	r3, #0
- 800177a:	613b      	str	r3, [r7, #16]
+ 800177a:	2300      	movs	r3, #0
+ 800177c:	613b      	str	r3, [r7, #16]
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
- 800177c:	1d3b      	adds	r3, r7, #4
- 800177e:	4619      	mov	r1, r3
- 8001780:	4829      	ldr	r0, [pc, #164]	@ (8001828 <MX_GPIO_Init+0x108>)
- 8001782:	f003 fccf 	bl	8005124 <HAL_GPIO_Init>
+ 800177e:	1d3b      	adds	r3, r7, #4
+ 8001780:	4619      	mov	r1, r3
+ 8001782:	4829      	ldr	r0, [pc, #164]	@ (8001828 <MX_GPIO_Init+0x108>)
+ 8001784:	f003 fcce 	bl	8005124 <HAL_GPIO_Init>
 
   /*Configure GPIO pins : PBPin PBPin PBPin PBPin */
   GPIO_InitStruct.Pin = DBG3_Pin|DBG4_Pin|LED2_Pin|DBG2_Pin;
- 8001786:	f44f 6387 	mov.w	r3, #1080	@ 0x438
- 800178a:	607b      	str	r3, [r7, #4]
+ 8001788:	f44f 6387 	mov.w	r3, #1080	@ 0x438
+ 800178c:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 800178c:	2301      	movs	r3, #1
- 800178e:	60bb      	str	r3, [r7, #8]
+ 800178e:	2301      	movs	r3, #1
+ 8001790:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 8001790:	2300      	movs	r3, #0
- 8001792:	60fb      	str	r3, [r7, #12]
+ 8001792:	2300      	movs	r3, #0
+ 8001794:	60fb      	str	r3, [r7, #12]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
- 8001794:	2303      	movs	r3, #3
- 8001796:	613b      	str	r3, [r7, #16]
+ 8001796:	2303      	movs	r3, #3
+ 8001798:	613b      	str	r3, [r7, #16]
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
- 8001798:	1d3b      	adds	r3, r7, #4
- 800179a:	4619      	mov	r1, r3
- 800179c:	4822      	ldr	r0, [pc, #136]	@ (8001828 <MX_GPIO_Init+0x108>)
- 800179e:	f003 fcc1 	bl	8005124 <HAL_GPIO_Init>
+ 800179a:	1d3b      	adds	r3, r7, #4
+ 800179c:	4619      	mov	r1, r3
+ 800179e:	4822      	ldr	r0, [pc, #136]	@ (8001828 <MX_GPIO_Init+0x108>)
+ 80017a0:	f003 fcc0 	bl	8005124 <HAL_GPIO_Init>
 
   /*Configure GPIO pin : PB14 */
   GPIO_InitStruct.Pin = GPIO_PIN_14;
- 80017a2:	f44f 4380 	mov.w	r3, #16384	@ 0x4000
- 80017a6:	607b      	str	r3, [r7, #4]
+ 80017a4:	f44f 4380 	mov.w	r3, #16384	@ 0x4000
+ 80017a8:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
- 80017a8:	2300      	movs	r3, #0
- 80017aa:	60bb      	str	r3, [r7, #8]
+ 80017aa:	2300      	movs	r3, #0
+ 80017ac:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 80017ac:	2300      	movs	r3, #0
- 80017ae:	60fb      	str	r3, [r7, #12]
+ 80017ae:	2300      	movs	r3, #0
+ 80017b0:	60fb      	str	r3, [r7, #12]
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
- 80017b0:	1d3b      	adds	r3, r7, #4
- 80017b2:	4619      	mov	r1, r3
- 80017b4:	481c      	ldr	r0, [pc, #112]	@ (8001828 <MX_GPIO_Init+0x108>)
- 80017b6:	f003 fcb5 	bl	8005124 <HAL_GPIO_Init>
+ 80017b2:	1d3b      	adds	r3, r7, #4
+ 80017b4:	4619      	mov	r1, r3
+ 80017b6:	481c      	ldr	r0, [pc, #112]	@ (8001828 <MX_GPIO_Init+0x108>)
+ 80017b8:	f003 fcb4 	bl	8005124 <HAL_GPIO_Init>
 
   /*Configure GPIO pins : PAPin PAPin PAPin */
   GPIO_InitStruct.Pin = DBG1_Pin|RF_CTRL1_Pin|RF_CTRL2_Pin;
- 80017ba:	2331      	movs	r3, #49	@ 0x31
- 80017bc:	607b      	str	r3, [r7, #4]
+ 80017bc:	2331      	movs	r3, #49	@ 0x31
+ 80017be:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 80017be:	2301      	movs	r3, #1
- 80017c0:	60bb      	str	r3, [r7, #8]
+ 80017c0:	2301      	movs	r3, #1
+ 80017c2:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 80017c2:	2300      	movs	r3, #0
- 80017c4:	60fb      	str	r3, [r7, #12]
+ 80017c4:	2300      	movs	r3, #0
+ 80017c6:	60fb      	str	r3, [r7, #12]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
- 80017c6:	2303      	movs	r3, #3
- 80017c8:	613b      	str	r3, [r7, #16]
+ 80017c8:	2303      	movs	r3, #3
+ 80017ca:	613b      	str	r3, [r7, #16]
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
- 80017ca:	1d3b      	adds	r3, r7, #4
- 80017cc:	4619      	mov	r1, r3
- 80017ce:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
- 80017d2:	f003 fca7 	bl	8005124 <HAL_GPIO_Init>
+ 80017cc:	1d3b      	adds	r3, r7, #4
+ 80017ce:	4619      	mov	r1, r3
+ 80017d0:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
+ 80017d4:	f003 fca6 	bl	8005124 <HAL_GPIO_Init>
 
   /*Configure GPIO pin : PtPin */
   GPIO_InitStruct.Pin = BUT1_Pin;
- 80017d6:	f44f 5300 	mov.w	r3, #8192	@ 0x2000
- 80017da:	607b      	str	r3, [r7, #4]
+ 80017d8:	f44f 5300 	mov.w	r3, #8192	@ 0x2000
+ 80017dc:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
- 80017dc:	f44f 1304 	mov.w	r3, #2162688	@ 0x210000
- 80017e0:	60bb      	str	r3, [r7, #8]
+ 80017de:	f44f 1304 	mov.w	r3, #2162688	@ 0x210000
+ 80017e2:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_PULLUP;
- 80017e2:	2301      	movs	r3, #1
- 80017e4:	60fb      	str	r3, [r7, #12]
+ 80017e4:	2301      	movs	r3, #1
+ 80017e6:	60fb      	str	r3, [r7, #12]
   HAL_GPIO_Init(BUT1_GPIO_Port, &GPIO_InitStruct);
- 80017e6:	1d3b      	adds	r3, r7, #4
- 80017e8:	4619      	mov	r1, r3
- 80017ea:	480f      	ldr	r0, [pc, #60]	@ (8001828 <MX_GPIO_Init+0x108>)
- 80017ec:	f003 fc9a 	bl	8005124 <HAL_GPIO_Init>
+ 80017e8:	1d3b      	adds	r3, r7, #4
+ 80017ea:	4619      	mov	r1, r3
+ 80017ec:	480e      	ldr	r0, [pc, #56]	@ (8001828 <MX_GPIO_Init+0x108>)
+ 80017ee:	f003 fc99 	bl	8005124 <HAL_GPIO_Init>
 
   /*Configure GPIO pin : PA9 */
   GPIO_InitStruct.Pin = GPIO_PIN_9;
- 80017f0:	f44f 7300 	mov.w	r3, #512	@ 0x200
- 80017f4:	607b      	str	r3, [r7, #4]
+ 80017f2:	f44f 7300 	mov.w	r3, #512	@ 0x200
+ 80017f6:	607b      	str	r3, [r7, #4]
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
- 80017f6:	2301      	movs	r3, #1
- 80017f8:	60bb      	str	r3, [r7, #8]
+ 80017f8:	2301      	movs	r3, #1
+ 80017fa:	60bb      	str	r3, [r7, #8]
   GPIO_InitStruct.Pull = GPIO_NOPULL;
- 80017fa:	2300      	movs	r3, #0
- 80017fc:	60fb      	str	r3, [r7, #12]
+ 80017fc:	2300      	movs	r3, #0
+ 80017fe:	60fb      	str	r3, [r7, #12]
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
- 80017fe:	2300      	movs	r3, #0
- 8001800:	613b      	str	r3, [r7, #16]
+ 8001800:	2300      	movs	r3, #0
+ 8001802:	613b      	str	r3, [r7, #16]
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
- 8001802:	1d3b      	adds	r3, r7, #4
- 8001804:	4619      	mov	r1, r3
- 8001806:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
- 800180a:	f003 fc8b 	bl	8005124 <HAL_GPIO_Init>
+ 8001804:	1d3b      	adds	r3, r7, #4
+ 8001806:	4619      	mov	r1, r3
+ 8001808:	f04f 4090 	mov.w	r0, #1207959552	@ 0x48000000
+ 800180c:	f003 fc8a 	bl	8005124 <HAL_GPIO_Init>
 
   /* EXTI interrupt init*/
   HAL_NVIC_SetPriority(EXTI15_10_IRQn, 0, 0);
- 800180e:	2200      	movs	r2, #0
- 8001810:	2100      	movs	r1, #0
- 8001812:	2029      	movs	r0, #41	@ 0x29
- 8001814:	f002 fe03 	bl	800441e <HAL_NVIC_SetPriority>
+ 8001810:	2200      	movs	r2, #0
+ 8001812:	2100      	movs	r1, #0
+ 8001814:	2029      	movs	r0, #41	@ 0x29
+ 8001816:	f002 fe02 	bl	800441e <HAL_NVIC_SetPriority>
   HAL_NVIC_EnableIRQ(EXTI15_10_IRQn);
- 8001818:	2029      	movs	r0, #41	@ 0x29
- 800181a:	f002 fe1a 	bl	8004452 <HAL_NVIC_EnableIRQ>
+ 800181a:	2029      	movs	r0, #41	@ 0x29
+ 800181c:	f002 fe19 	bl	8004452 <HAL_NVIC_EnableIRQ>
 
 }
- 800181e:	bf00      	nop
- 8001820:	3718      	adds	r7, #24
- 8001822:	46bd      	mov	sp, r7
- 8001824:	bd80      	pop	{r7, pc}
- 8001826:	bf00      	nop
+ 8001820:	bf00      	nop
+ 8001822:	3718      	adds	r7, #24
+ 8001824:	46bd      	mov	sp, r7
+ 8001826:	bd80      	pop	{r7, pc}
  8001828:	48000400 	.word	0x48000400
 
 0800182c <LL_RCC_LSE_SetDriveCapability>:
@@ -28576,7 +28574,6 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 
 0800a65c <SendTxData>:
 
-
 static void SendTxData(void)
 {
  800a65c:	b580      	push	{r7, lr}
@@ -28647,8 +28644,6 @@ static void SendTxData(void)
  800a6c4:	0801e948 	.word	0x0801e948
 
 0800a6c8 <OnTxTimerEvent>:
-
-
 
 static void OnTxTimerEvent(void *context)
 {

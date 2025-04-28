@@ -273,7 +273,7 @@ static LmHandlerCallbacks_t LmHandlerCallbacks =
 static LmHandlerParams_t LmHandlerParams =
 {
   .ActiveRegion =             ACTIVE_REGION,
-  .DefaultClass =             CLASS_C,
+  .DefaultClass =             LORAWAN_DEFAULT_CLASS,
   .AdrEnable =                LORAWAN_ADR_STATE,
   .IsTxConfirmed =            LORAWAN_DEFAULT_CONFIRMED_MSG_STATE,
   .TxDatarate =               LORAWAN_DEFAULT_DATA_RATE,
@@ -569,7 +569,6 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
   /* USER CODE END OnRxData_1 */
 }
 
-
 static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
@@ -593,8 +592,6 @@ static void SendTxData(void)
 	  }
   /* USER CODE END SendTxData_1 */
 }
-
-
 
 static void OnTxTimerEvent(void *context)
 {
@@ -916,3 +913,4 @@ static void OnRestoreContextRequest(void *nvm, uint32_t nvm_size)
 
   /* USER CODE END OnRestoreContextRequest_Last */
 }
+
