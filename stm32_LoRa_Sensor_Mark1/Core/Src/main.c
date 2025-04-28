@@ -30,6 +30,7 @@
 #include "stm32_timer.h"
 #include "pump_state.h"
 #include "sys_app.h"
+
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -42,7 +43,7 @@
 PumpState_t pumpState;
 uint8_t statePump = 0;
 uint8_t durationMinutes = 0;
-
+UTIL_TIMER_Object_t HelloTimer;
 
 /* USER CODE END PD */
 
@@ -61,7 +62,6 @@ uint8_t durationMinutes = 0;
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void PumpStateMachine(PumpState_t state,uint8_t duration);
-
 
 /* USER CODE END PFP */
 
@@ -100,17 +100,15 @@ int main(void)
   MX_LoRaWAN_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-
     /* USER CODE END WHILE */
     MX_LoRaWAN_Process();
 
@@ -170,61 +168,79 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
-void PumpStateMachine(PumpState_t state,uint8_t duration)
+
+UTIL_TIMER_Object_t PumpTimer;
+static PumpState_t currentPumpState;
+static uint8_t autoDurationMinutes = 0;
+
+static void PumpDelayCallback(void *context)
 {
-  switch (state)
-  {
-//    case STATE_IDLE:
-//		APP_LOG(TS_ON, VLEVEL_M, "STATE_IDLE\r\n");
-//		HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-//		HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-//      break;
-
-	  case STATE_PUMP_ON:
-	  {
-	          APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
-	          HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-	          HAL_Delay(1000);
-	          HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-	          APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: ครบ 1 วิ ปิดปั๊มแล้ว\r\n");
-	      break;
-	  }
-
-
-	  case STATE_PUMP_OFF:
-	  {
-	          APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
-	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-	          HAL_Delay(1000);
-	          HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-	          APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบเวลา 1 วิ ปิดปั๊มแล้ว\r\n");
-	      break;
-	  }
-
-
-
-	  case STATE_AUTO:
-	  {
-		  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
-	      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-	      APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: เปิดปั๊ม (เวลา %d นาที)\r\n", duration);
-	      HAL_Delay(1000);
-	      HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-	      HAL_Delay((uint32_t)duration * 60 * 1000);
-
-	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-	      APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ครบเวลา ปิดปั๊มแล้ว\r\n");
-	      HAL_Delay(1000);
-	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-	      HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-	      break;
-	  }
-
-      default:
-
-      break;
-  }
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+    APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ดับ LED เสร็จแล้ว\r\n");
 }
+
+static void PumpTimerCallback(void *context)
+{
+    switch (currentPumpState)
+    {
+        case STATE_PUMP_ON:
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: ครบ 1 วิ ปิดปั๊มแล้ว\r\n");
+            break;
+
+        case STATE_PUMP_OFF:
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบ 1 วิ ปิดปั๊มแล้ว\r\n");
+            break;
+
+        case STATE_AUTO:
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ครบเวลา ปิดปั๊มแล้ว\r\n");
+            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpDelayCallback, NULL);
+            UTIL_TIMER_Start(&PumpTimer);
+            break;
+
+        default:
+            break;
+    }
+}
+
+void PumpStateMachine(PumpState_t state, uint8_t duration)
+{
+    currentPumpState = state;
+    autoDurationMinutes = duration;
+
+    switch (state)
+    {
+        case STATE_PUMP_ON:
+            APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
+            UTIL_TIMER_Start(&PumpTimer);
+            break;
+
+        case STATE_PUMP_OFF:
+            APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
+            UTIL_TIMER_Start(&PumpTimer);
+            break;
+
+        case STATE_AUTO:
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: เปิดปั๊ม (เวลา %d นาที)\r\n", duration);
+
+            UTIL_TIMER_Create(&PumpTimer, (uint32_t)duration * 60 * 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
+            UTIL_TIMER_Start(&PumpTimer);
+            break;
+
+        default:
+            break;
+    }
+}
+
 
 
 /* USER CODE END 4 */
