@@ -211,7 +211,7 @@ static void OnPingSlotPeriodicityChanged(uint8_t pingSlotPeriodicity);
 static void OnSystemReset(void);
 
 /* USER CODE BEGIN PFP */
-
+static void CurrentSensorCallback(void *context);
 /**
   * @brief  LED Tx timer callback function
   * @param  context ptr of LED context
@@ -449,40 +449,40 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 static void CurrentSensorCallback(void *contex)
 {
-	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
+	static bool lastCurrentState = false;
+	APP_LOG(TS_ON, VLEVEL_M,"Sensor check!!!");
 
-	if(pinState == GPIO_PIN_SET)
+	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
+	bool currentState = (pinState == GPIO_PIN_SET);
+
+	if(currentState != lastCurrentState)
 	{
 		if(!currentDetected)
 		{
 			APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
 
-			AppData.Port = LORA_USER_APP_PORT;
+			AppData.Port = LORAWAN_USER_APP_PORT;
 			AppData.BufferSize = 1;
-			AppDataBuffer[0] = 0x01;
+			AppDataBuffer[0] = 0x01;	//Pump ON
 			AppData.Buffer = AppDataBuffer;
 
-			LmHandlerSend(&AppData, LORAWAN_DEFAULT_COMFIRMED_MSG_STATE, false);
+			LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
 
-			currentDetected = true;
 		}
-	}
-	else
-	{
-		if(currentDetected)
+		else
 		{
-			APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
 
-			AppData.port = LORA_USER_APP_PORT;
-			AppData.BufferSize = 1;
-			AppDataBuffer[0] = 0x00;
-			AppData.Buffer = AppDataBuffer;
+				APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
 
-			LmHandlerSend(&AppData, LORAWAN_DEFAULT_COMFIRMED_MSG_STATE, false);
+				AppData.Port = LORAWAN_USER_APP_PORT;
+				AppData.BufferSize = 1;
+				AppDataBuffer[0] = 0x00;	//Pump Off
+				AppData.Buffer = AppDataBuffer;
 
-			currentDetected = false;
+				LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+
 		}
-
+		lastCurrentState = currentState;	//update state
 	}
 	UTIL_TIMER_Start(&CurrentSensorTimer);
 

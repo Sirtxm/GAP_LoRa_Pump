@@ -177,7 +177,7 @@ static void PumpDelayCallback(void *context)
 {
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
     HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-    APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ดับ LED เสร็จแล้ว\r\n");
+    APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: LED OFF \r\n");
 }
 
 static void PumpTimerCallback(void *context)
@@ -186,17 +186,17 @@ static void PumpTimerCallback(void *context)
     {
         case STATE_PUMP_ON:
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: ครบ 1 วิ ปิดปั๊มแล้ว\r\n");
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: \r\n");
             break;
 
         case STATE_PUMP_OFF:
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: ครบ 1 วิ ปิดปั๊มแล้ว\r\n");
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: \r\n");
             break;
 
         case STATE_AUTO:
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: ครบเวลา ปิดปั๊มแล้ว\r\n");
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Time out\r\n");
             UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpDelayCallback, NULL);
             UTIL_TIMER_Start(&PumpTimer);
             break;
@@ -230,7 +230,7 @@ void PumpStateMachine(PumpState_t state, uint8_t duration)
         case STATE_AUTO:
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: เปิดปั๊ม (เวลา %d นาที)\r\n", duration);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Time : ( %d Minutes)\r\n", duration);
 
             UTIL_TIMER_Create(&PumpTimer, (uint32_t)duration * 60 * 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
             UTIL_TIMER_Start(&PumpTimer);
