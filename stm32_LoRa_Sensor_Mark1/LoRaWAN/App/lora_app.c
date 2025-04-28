@@ -273,7 +273,7 @@ static LmHandlerCallbacks_t LmHandlerCallbacks =
 static LmHandlerParams_t LmHandlerParams =
 {
   .ActiveRegion =             ACTIVE_REGION,
-  .DefaultClass =             LORAWAN_DEFAULT_CLASS,
+  .DefaultClass =             CLASS_C,
   .AdrEnable =                LORAWAN_ADR_STATE,
   .IsTxConfirmed =            LORAWAN_DEFAULT_CONFIRMED_MSG_STATE,
   .TxDatarate =               LORAWAN_DEFAULT_DATA_RATE,

@@ -191,7 +191,7 @@ void PumpStateMachine(PumpState_t state, uint8_t duration)
             APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
             HAL_Delay(1000);
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
             break;
 
         case STATE_AUTO:
