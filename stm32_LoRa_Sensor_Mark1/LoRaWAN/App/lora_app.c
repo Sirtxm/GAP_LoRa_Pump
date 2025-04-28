@@ -450,49 +450,87 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 static void CurrentSensorCallback(void *contex)
 {
 	static bool lastCurrentState = false;
+	static bool initialized = false;
 
 	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
 	bool currentState = (pinState == GPIO_PIN_SET);
 
-	if(currentState != lastCurrentState)
+	if(!initialized)
 	{
-		if(!currentDetected)
-		{
-			APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
+		lastCurrentState = currentState;
+		currentDetected = currentState;
+		initialized = true;
 
-			AppData.Port = LORAWAN_USER_APP_PORT;
-			AppData.BufferSize = 1;
-			AppDataBuffer[0] = 0x01;	//Pump ON
-			AppData.Buffer = AppDataBuffer;
+		 if (currentState)
+		        {
+		            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
 
-			LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+		            AppData.Port = LORAWAN_USER_APP_PORT;
+		            AppData.BufferSize = 1;
+		            AppDataBuffer[0] = 0x01; // Pump ON
+		            AppData.Buffer = AppDataBuffer;
 
-		}
-		else
-		{
+		            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+		            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
 
-			APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
+		        }
+		        else
+		        {
+		            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
 
-			AppData.Port = LORAWAN_USER_APP_PORT;
-			AppData.BufferSize = 1;
-			AppDataBuffer[0] = 0x00;	//Pump Off
-			AppData.Buffer = AppDataBuffer;
+		            AppData.Port = LORAWAN_USER_APP_PORT;
+		            AppData.BufferSize = 1;
+		            AppDataBuffer[0] = 0x00; // Pump OFF
+		            AppData.Buffer = AppDataBuffer;
 
-			LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-
-				if(pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
-				{
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);	//LED error
-					APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
-				}
-				else
-				{
-					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-				}
-		}
-		lastCurrentState = currentState;	//update state
+		            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+		            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+		        }
 	}
-	UTIL_TIMER_Start(&CurrentSensorTimer);
+
+	else if (currentState != lastCurrentState)
+	    {
+	        if (currentState)
+	        {
+	            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
+
+	            AppData.Port = LORAWAN_USER_APP_PORT;
+	            AppData.BufferSize = 1;
+	            AppDataBuffer[0] = 0x01;    // Pump ON
+	            AppData.Buffer = AppDataBuffer;
+
+	            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+	            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+
+	            currentDetected = true;
+	        }
+	        else
+	        {
+	            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
+
+	            AppData.Port = LORAWAN_USER_APP_PORT;
+	            AppData.BufferSize = 1;
+	            AppDataBuffer[0] = 0x00;    // Pump OFF
+	            AppData.Buffer = AppDataBuffer;
+
+	            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+	            currentDetected = false;
+
+	            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
+	            {
+	                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);  // LED error
+	                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
+	            }
+	            else
+	            {
+	                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+	            }
+	        }
+
+	        lastCurrentState = currentState;  // update state หลังจากส่ง uplink
+	    }
+
+	    UTIL_TIMER_Start(&CurrentSensorTimer);
 }
 /* USER CODE END PB_Callbacks */
 
