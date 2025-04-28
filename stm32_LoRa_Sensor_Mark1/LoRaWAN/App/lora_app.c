@@ -447,91 +447,82 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
   }
 }
 
-static void CurrentSensorCallback(void *contex)
+static void CurrentSensorCallback(void *context)
 {
-	static bool lastCurrentState = false;
-	static bool initialized = false;
+    static bool lastCurrentState = false;
+    static bool initialized = false;
 
-	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
-	bool currentState = (pinState == GPIO_PIN_SET);
+    GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
+    bool currentState = (pinState == GPIO_PIN_SET);
 
-	if(!initialized)
-	{
-		lastCurrentState = currentState;
-		currentDetected = currentState;
-		initialized = true;
+    if (!initialized)
+    {
+        lastCurrentState = currentState;
+        currentDetected = currentState;
+        initialized = true;
 
-		 if (currentState)
-		        {
-		            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
+        if (currentState)
+        {
+            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
+            AppData.Port = LORAWAN_USER_APP_PORT;
+            AppData.BufferSize = 1;
+            AppDataBuffer[0] = 0x01; // Pump ON
+            AppData.Buffer = AppDataBuffer;
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+        }
+        else
+        {
+            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
+            AppData.Port = LORAWAN_USER_APP_PORT;
+            AppData.BufferSize = 1;
+            AppDataBuffer[0] = 0x00; // Pump OFF
+            AppData.Buffer = AppDataBuffer;
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+        }
 
-		            AppData.Port = LORAWAN_USER_APP_PORT;
-		            AppData.BufferSize = 1;
-		            AppDataBuffer[0] = 0x01; // Pump ON
-		            AppData.Buffer = AppDataBuffer;
+        // เรียก SendTxData หลังจากตั้งค่าเสร็จ
+        SendTxData();
+    }
+    else if (currentState != lastCurrentState)
+    {
+        if (currentState)
+        {
+            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
+            AppData.Port = LORAWAN_USER_APP_PORT;
+            AppData.BufferSize = 1;
+            AppDataBuffer[0] = 0x01; // Pump ON
+            AppData.Buffer = AppDataBuffer;
 
-		            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-		            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+            currentDetected = true;
+        }
+        else
+        {
+            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending pump OFF uplink...\r\n");
+            AppData.Port = LORAWAN_USER_APP_PORT;
+            AppData.BufferSize = 1;
+            AppDataBuffer[0] = 0x00; // Pump OFF
+            AppData.Buffer = AppDataBuffer;
 
-		        }
-		        else
-		        {
-		            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
+            currentDetected = false;
 
-		            AppData.Port = LORAWAN_USER_APP_PORT;
-		            AppData.BufferSize = 1;
-		            AppDataBuffer[0] = 0x00; // Pump OFF
-		            AppData.Buffer = AppDataBuffer;
+            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
+            {
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // LED error
+                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
+            }
+            else
+            {
+                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+            }
+        }
 
-		            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-		            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-		        }
-	}
+        lastCurrentState = currentState;
+        SendTxData(); // เรียก SendTxData หลังจากตั้งค่า AppData เสร็จ
+    }
 
-	else if (currentState != lastCurrentState)
-	    {
-	        if (currentState)
-	        {
-	            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
-
-	            AppData.Port = LORAWAN_USER_APP_PORT;
-	            AppData.BufferSize = 1;
-	            AppDataBuffer[0] = 0x01;    // Pump ON
-	            AppData.Buffer = AppDataBuffer;
-
-	            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-	            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-
-	            currentDetected = true;
-	        }
-	        else
-	        {
-	            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
-
-	            AppData.Port = LORAWAN_USER_APP_PORT;
-	            AppData.BufferSize = 1;
-	            AppDataBuffer[0] = 0x00;    // Pump OFF
-	            AppData.Buffer = AppDataBuffer;
-
-	            LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-	            currentDetected = false;
-
-	            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
-	            {
-	                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);  // LED error
-	                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
-	            }
-	            else
-	            {
-	                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-	            }
-	        }
-
-	        lastCurrentState = currentState;  // update state หลังจากส่ง uplink
-	    }
-
-	    UTIL_TIMER_Start(&CurrentSensorTimer);
+    UTIL_TIMER_Start(&CurrentSensorTimer);
 }
+
 /* USER CODE END PB_Callbacks */
 
 /* Private functions ---------------------------------------------------------*/
@@ -582,24 +573,24 @@ static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 static void SendTxData(void)
 {
   /* USER CODE BEGIN SendTxData_1 */
-  LmHandlerErrorStatus_t status;
+	 LmHandlerErrorStatus_t status;
 
+	  if (AppData.BufferSize == 0 || AppData.Buffer == NULL)
+	  {
+	    APP_LOG(TS_ON, VLEVEL_L, "No data to send!\r\n");
+	    return;
+	  }
 
-  AppData.Port = LORAWAN_USER_APP_PORT;
-  AppData.BufferSize = 0;
-  AppData.Buffer = NULL;
+	  status = LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
 
-
-  status = LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
-
-  if (status == LORAMAC_HANDLER_SUCCESS)
-  {
-    APP_LOG(TS_ON, VLEVEL_L, "SEND EMPTY REQUEST SUCCESS\r\n");
-  }
-  else
-  {
-    APP_LOG(TS_ON, VLEVEL_L, "SEND EMPTY REQUEST FAILED\r\n");
-  }
+	  if (status == LORAMAC_HANDLER_SUCCESS)
+	  {
+	    APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST SUCCESS\r\n");
+	  }
+	  else
+	  {
+	    APP_LOG(TS_ON, VLEVEL_L, "SEND REQUEST FAILED\r\n");
+	  }
   /* USER CODE END SendTxData_1 */
 }
 
