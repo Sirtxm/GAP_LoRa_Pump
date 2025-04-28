@@ -450,7 +450,6 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 static void CurrentSensorCallback(void *contex)
 {
 	static bool lastCurrentState = false;
-	APP_LOG(TS_ON, VLEVEL_M,"Sensor check!!!");
 
 	GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
 	bool currentState = (pinState == GPIO_PIN_SET);
