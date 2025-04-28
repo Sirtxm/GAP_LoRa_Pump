@@ -480,7 +480,7 @@ static void CurrentSensorCallback(void *context)
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
         }
 
-        // เรียก SendTxData หลังจากตั้งค่าเสร็จ
+
         SendTxData();
     }
     else if (currentState != lastCurrentState)
@@ -517,7 +517,7 @@ static void CurrentSensorCallback(void *context)
         }
 
         lastCurrentState = currentState;
-        SendTxData(); // เรียก SendTxData หลังจากตั้งค่า AppData เสร็จ
+        SendTxData();
     }
 
     UTIL_TIMER_Start(&CurrentSensorTimer);

@@ -43,8 +43,13 @@
 PumpState_t pumpState;
 uint8_t statePump = 0;
 uint8_t durationMinutes = 0;
-UTIL_TIMER_Object_t HelloTimer;
 
+// ===== Declare ที่ global =====
+UTIL_TIMER_Object_t PumpTimer;
+UTIL_TIMER_Object_t PumpDelayTimer;
+
+static PumpState_t currentPumpState;
+static uint8_t autoDurationMinutes = 0;
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -62,7 +67,7 @@ UTIL_TIMER_Object_t HelloTimer;
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void PumpStateMachine(PumpState_t state,uint8_t duration);
-
+void PumpStateMachine_Init(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
@@ -83,7 +88,6 @@ int main(void)
 
   /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
   HAL_Init();
-
   /* USER CODE BEGIN Init */
 
   /* USER CODE END Init */
@@ -169,43 +173,6 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-UTIL_TIMER_Object_t PumpTimer;
-static PumpState_t currentPumpState;
-static uint8_t autoDurationMinutes = 0;
-
-static void PumpDelayCallback(void *context)
-{
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-    HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-    APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: LED OFF \r\n");
-}
-
-static void PumpTimerCallback(void *context)
-{
-    switch (currentPumpState)
-    {
-        case STATE_PUMP_ON:
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_ON: \r\n");
-            break;
-
-        case STATE_PUMP_OFF:
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_PUMP_OFF: \r\n");
-            break;
-
-        case STATE_AUTO:
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Time out\r\n");
-            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpDelayCallback, NULL);
-            UTIL_TIMER_Start(&PumpTimer);
-            break;
-
-        default:
-            break;
-    }
-}
-
 void PumpStateMachine(PumpState_t state, uint8_t duration)
 {
     currentPumpState = state;
@@ -216,24 +183,31 @@ void PumpStateMachine(PumpState_t state, uint8_t duration)
         case STATE_PUMP_ON:
             APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
-            UTIL_TIMER_Start(&PumpTimer);
+            HAL_Delay(1000);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
             break;
 
         case STATE_PUMP_OFF:
             APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
-            UTIL_TIMER_Create(&PumpTimer, 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
-            UTIL_TIMER_Start(&PumpTimer);
+            HAL_Delay(1000);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
             break;
 
         case STATE_AUTO:
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
             HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_RESET);
-            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Time : ( %d Minutes)\r\n", duration);
+            HAL_Delay(1000);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Duration %d min\r\n", duration);
 
-            UTIL_TIMER_Create(&PumpTimer, (uint32_t)duration * 60 * 1000, UTIL_TIMER_ONESHOT, PumpTimerCallback, NULL);
-            UTIL_TIMER_Start(&PumpTimer);
+
+            HAL_Delay((uint32_t)duration * 60 * 1000);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+            HAL_Delay(1000);
+            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+            APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: DONE!!!\r\n");
             break;
 
         default:
