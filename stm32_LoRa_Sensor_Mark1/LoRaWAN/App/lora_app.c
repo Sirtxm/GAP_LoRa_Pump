@@ -405,7 +405,7 @@ void LoRaWAN_Init(void)
 
   /* USER CODE BEGIN LoRaWAN_Init_2 */
   UTIL_TIMER_Start(&JoinLedTimer);
-  UTIL_TIMER_Create(&CurrentSensorTimer, 500, UTIL_TIMER_ONESHOT, CurrentSensorCallback, NULL);
+  UTIL_TIMER_Create(&CurrentSensorTimer, 1000, UTIL_TIMER_ONESHOT, CurrentSensorCallback, NULL);
   UTIL_TIMER_Start(&CurrentSensorTimer);
   /* USER CODE END LoRaWAN_Init_2 */
 
@@ -472,20 +472,28 @@ static void CurrentSensorCallback(void *contex)
 		else
 		{
 
-				APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
+			APP_LOG(TS_ON, VLEVEL_M, "No current! Sending Pump OFF uplink...\r\n");
 
-				AppData.Port = LORAWAN_USER_APP_PORT;
-				AppData.BufferSize = 1;
-				AppDataBuffer[0] = 0x00;	//Pump Off
-				AppData.Buffer = AppDataBuffer;
+			AppData.Port = LORAWAN_USER_APP_PORT;
+			AppData.BufferSize = 1;
+			AppDataBuffer[0] = 0x00;	//Pump Off
+			AppData.Buffer = AppDataBuffer;
 
-				LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
+			LmHandlerSend(&AppData, LORAWAN_DEFAULT_CONFIRMED_MSG_STATE, false);
 
+				if(pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
+				{
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);	//LED error
+					APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
+				}
+				else
+				{
+					HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+				}
 		}
 		lastCurrentState = currentState;	//update state
 	}
 	UTIL_TIMER_Start(&CurrentSensorTimer);
-
 }
 /* USER CODE END PB_Callbacks */
 
