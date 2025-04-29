@@ -461,84 +461,13 @@ static void CurrentSensorCallback(void *context)
 	}
 	else
 	{
-		 APP_LOG(TS_ON, VLEVEL_L, "First check: No current! Sending pump OFF uplink...\r\n");
+		 APP_LOG(TS_ON, VLEVEL_L, "No current! Sending pump OFF uplink...\r\n");
 		 AppData.Port = LORAWAN_USER_APP_PORT;
 		 AppData.BufferSize = 1;
 		 AppDataBuffer[0] = 0x00; // Pump OFF
 		 AppData.Buffer = AppDataBuffer;
 	}
 	SendTxData();
-//    static bool lastCurrentState = false;
-//    static bool initialized = false;
-//
-//    GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
-//    bool currentState = (pinState == GPIO_PIN_SET);
-//
-//    if (!initialized)
-//    {
-//        lastCurrentState = currentState;
-//        currentDetected = currentState;
-//        initialized = true;
-//
-//        if (currentState)
-//        {
-//            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
-//            AppData.Port = LORAWAN_USER_APP_PORT;
-//            AppData.BufferSize = 1;
-//            AppDataBuffer[0] = 0x01; // Pump ON
-//            AppData.Buffer = AppDataBuffer;
-////            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-//        }
-//        else
-//        {
-//            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
-//            AppData.Port = LORAWAN_USER_APP_PORT;
-//            AppData.BufferSize = 1;
-//            AppDataBuffer[0] = 0x00; // Pump OFF
-//            AppData.Buffer = AppDataBuffer;
-////            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
-//        }
-//
-//
-//        SendTxData();
-//    }
-//    else if (currentState != lastCurrentState)
-//    {
-//        if (currentState)
-//        {
-//            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
-//            AppData.Port = LORAWAN_USER_APP_PORT;
-//            AppData.BufferSize = 1;
-//            AppDataBuffer[0] = 0x01; // Pump ON
-//            AppData.Buffer = AppDataBuffer;
-//            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-//            currentDetected = true;
-//        }
-//        else
-//        {
-//            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending pump OFF uplink...\r\n");
-//            AppData.Port = LORAWAN_USER_APP_PORT;
-//            AppData.BufferSize = 1;
-//            AppDataBuffer[0] = 0x00; // Pump OFF
-//            AppData.Buffer = AppDataBuffer;
-//
-//            currentDetected = false;
-//
-//            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
-//            {
-////                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // LED error
-//                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
-//            }
-//            else
-//            {
-////                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-//            }
-//        }
-//
-//        lastCurrentState = currentState;
-//        SendTxData();
-//    }
-//
     UTIL_TIMER_Start(&CurrentSensorTimer);
 }
 

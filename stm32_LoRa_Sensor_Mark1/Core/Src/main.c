@@ -21,7 +21,6 @@
 #include "app_lorawan.h"
 #include "usart.h"
 #include "gpio.h"
-
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include <stdio.h>
@@ -30,7 +29,6 @@
 #include "stm32_timer.h"
 #include "pump_state.h"
 #include "sys_app.h"
-
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -43,11 +41,9 @@
 PumpState_t pumpState;
 uint8_t statePump = 0;
 uint8_t durationMinutes = 0;
-
 // ===== Declare ที่ global =====
 UTIL_TIMER_Object_t PumpTimer;
 UTIL_TIMER_Object_t PumpDelayTimer;
-
 static PumpState_t currentPumpState;
 static uint8_t autoDurationMinutes = 0;
 /* USER CODE END PD */
@@ -67,7 +63,6 @@ static uint8_t autoDurationMinutes = 0;
 void SystemClock_Config(void);
 /* USER CODE BEGIN PFP */
 void PumpStateMachine(PumpState_t state,uint8_t duration);
-
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
