@@ -108,6 +108,7 @@ int main(void)
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
 
   /* USER CODE END 2 */
@@ -184,9 +185,9 @@ void PumpStateMachine(PumpState_t state, uint8_t duration)
     {
         case STATE_PUMP_ON:
             APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
             HAL_Delay(1000);
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
             break;
 
         case STATE_PUMP_OFF:
@@ -198,17 +199,17 @@ void PumpStateMachine(PumpState_t state, uint8_t duration)
 
         case STATE_AUTO:
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_RESET);
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
             HAL_Delay(1000);
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_SET);
             APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: Duration %d min\r\n", duration);
 
 
             HAL_Delay((uint32_t)duration * 60 * 1000);
             HAL_GPIO_WritePin(GPIOB, GPIO_PIN_5, GPIO_PIN_SET);
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_RESET);
             HAL_Delay(1000);
-            HAL_GPIO_WritePin(GPIOA, GPIO_PIN_15, GPIO_PIN_SET);
+            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_15, GPIO_PIN_SET);
             APP_LOG(TS_ON, VLEVEL_M, "[PumpStateMachine] STATE_AUTO: DONE!!!\r\n");
             break;
 

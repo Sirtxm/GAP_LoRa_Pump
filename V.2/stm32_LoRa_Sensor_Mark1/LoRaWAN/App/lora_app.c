@@ -332,7 +332,7 @@ static UTIL_TIMER_Object_t RxLedTimer;
 static UTIL_TIMER_Object_t JoinLedTimer;
 
 static UTIL_TIMER_Object_t CurrentSensorTimer;
-static bool currentDetected = false;
+
 /* USER CODE END PV */
 
 /* Exported functions ---------------------------------------------------------*/
@@ -449,77 +449,96 @@ void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
 
 static void CurrentSensorCallback(void *context)
 {
-    static bool lastCurrentState = false;
-    static bool initialized = false;
 
-    GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_14);
-    bool currentState = (pinState == GPIO_PIN_SET);
+	 GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
 
-    if (!initialized)
-    {
-        lastCurrentState = currentState;
-        currentDetected = currentState;
-        initialized = true;
-
-        if (currentState)
-        {
-            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
-            AppData.Port = LORAWAN_USER_APP_PORT;
-            AppData.BufferSize = 1;
-            AppDataBuffer[0] = 0x01; // Pump ON
-            AppData.Buffer = AppDataBuffer;
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-        }
-        else
-        {
-            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
-            AppData.Port = LORAWAN_USER_APP_PORT;
-            AppData.BufferSize = 1;
-            AppDataBuffer[0] = 0x00; // Pump OFF
-            AppData.Buffer = AppDataBuffer;
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
-        }
-
-
-        SendTxData();
-    }
-    else if (currentState != lastCurrentState)
-    {
-        if (currentState)
-        {
-            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
-            AppData.Port = LORAWAN_USER_APP_PORT;
-            AppData.BufferSize = 1;
-            AppDataBuffer[0] = 0x01; // Pump ON
-            AppData.Buffer = AppDataBuffer;
-            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-            currentDetected = true;
-        }
-        else
-        {
-            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending pump OFF uplink...\r\n");
-            AppData.Port = LORAWAN_USER_APP_PORT;
-            AppData.BufferSize = 1;
-            AppDataBuffer[0] = 0x00; // Pump OFF
-            AppData.Buffer = AppDataBuffer;
-
-            currentDetected = false;
-
-            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
-            {
-                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // LED error
-                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
-            }
-            else
-            {
-                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
-            }
-        }
-
-        lastCurrentState = currentState;
-        SendTxData();
-    }
-
+	if(pinState == GPIO_PIN_RESET){
+		 APP_LOG(TS_ON, VLEVEL_L, "Current detected! Sending pump ON uplink...\r\n");
+		 AppData.Port = LORAWAN_USER_APP_PORT;
+		 AppData.BufferSize = 1;
+		 AppDataBuffer[0] = 0x01; // Pump ON
+		 AppData.Buffer = AppDataBuffer;
+	}
+	else
+	{
+		 APP_LOG(TS_ON, VLEVEL_L, "First check: No current! Sending pump OFF uplink...\r\n");
+		 AppData.Port = LORAWAN_USER_APP_PORT;
+		 AppData.BufferSize = 1;
+		 AppDataBuffer[0] = 0x00; // Pump OFF
+		 AppData.Buffer = AppDataBuffer;
+	}
+	SendTxData();
+//    static bool lastCurrentState = false;
+//    static bool initialized = false;
+//
+//    GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
+//    bool currentState = (pinState == GPIO_PIN_SET);
+//
+//    if (!initialized)
+//    {
+//        lastCurrentState = currentState;
+//        currentDetected = currentState;
+//        initialized = true;
+//
+//        if (currentState)
+//        {
+//            APP_LOG(TS_ON, VLEVEL_M, "First check: Current detected! Sending pump ON uplink...\r\n");
+//            AppData.Port = LORAWAN_USER_APP_PORT;
+//            AppData.BufferSize = 1;
+//            AppDataBuffer[0] = 0x01; // Pump ON
+//            AppData.Buffer = AppDataBuffer;
+////            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+//        }
+//        else
+//        {
+//            APP_LOG(TS_ON, VLEVEL_M, "First check: No current! Sending pump OFF uplink...\r\n");
+//            AppData.Port = LORAWAN_USER_APP_PORT;
+//            AppData.BufferSize = 1;
+//            AppDataBuffer[0] = 0x00; // Pump OFF
+//            AppData.Buffer = AppDataBuffer;
+////            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET);
+//        }
+//
+//
+//        SendTxData();
+//    }
+//    else if (currentState != lastCurrentState)
+//    {
+//        if (currentState)
+//        {
+//            APP_LOG(TS_ON, VLEVEL_M, "Current detected! Sending pump ON uplink...\r\n");
+//            AppData.Port = LORAWAN_USER_APP_PORT;
+//            AppData.BufferSize = 1;
+//            AppDataBuffer[0] = 0x01; // Pump ON
+//            AppData.Buffer = AppDataBuffer;
+//            HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+//            currentDetected = true;
+//        }
+//        else
+//        {
+//            APP_LOG(TS_ON, VLEVEL_M, "No current! Sending pump OFF uplink...\r\n");
+//            AppData.Port = LORAWAN_USER_APP_PORT;
+//            AppData.BufferSize = 1;
+//            AppDataBuffer[0] = 0x00; // Pump OFF
+//            AppData.Buffer = AppDataBuffer;
+//
+//            currentDetected = false;
+//
+//            if (pumpState == STATE_PUMP_ON || pumpState == STATE_AUTO)
+//            {
+////                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_RESET); // LED error
+//                APP_LOG(TS_ON, VLEVEL_M, "ERROR: Pump should be ON but no current detected!\r\n");
+//            }
+//            else
+//            {
+////                HAL_GPIO_WritePin(GPIOB, GPIO_PIN_9, GPIO_PIN_SET);
+//            }
+//        }
+//
+//        lastCurrentState = currentState;
+//        SendTxData();
+//    }
+//
     UTIL_TIMER_Start(&CurrentSensorTimer);
 }
 
@@ -913,3 +932,4 @@ static void OnRestoreContextRequest(void *nvm, uint32_t nvm_size)
 
   /* USER CODE END OnRestoreContextRequest_Last */
 }
+
