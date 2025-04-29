@@ -451,15 +451,16 @@ static void CurrentSensorCallback(void *context)
 {
 
 	 GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
+	 APP_LOG(TS_ON, VLEVEL_L, "Pin state: %d\r\n", pinState);
 
-	if(pinState == GPIO_PIN_RESET){
+	if(pinState == GPIO_PIN_SET){
 		 APP_LOG(TS_ON, VLEVEL_L, "Current detected! Sending pump ON uplink...\r\n");
 		 AppData.Port = LORAWAN_USER_APP_PORT;
 		 AppData.BufferSize = 1;
 		 AppDataBuffer[0] = 0x01; // Pump ON
 		 AppData.Buffer = AppDataBuffer;
 	}
-	else
+	else if(pinState == GPIO_PIN_RESET)
 	{
 		 APP_LOG(TS_ON, VLEVEL_L, "No current! Sending pump OFF uplink...\r\n");
 		 AppData.Port = LORAWAN_USER_APP_PORT;
