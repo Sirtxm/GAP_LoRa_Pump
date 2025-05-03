@@ -405,7 +405,7 @@ void LoRaWAN_Init(void)
 
   /* USER CODE BEGIN LoRaWAN_Init_2 */
   UTIL_TIMER_Start(&JoinLedTimer);
-  UTIL_TIMER_Create(&CurrentSensorTimer, 1000, UTIL_TIMER_ONESHOT, CurrentSensorCallback, NULL);
+  UTIL_TIMER_Create(&CurrentSensorTimer, 5000, UTIL_TIMER_ONESHOT, CurrentSensorCallback, NULL);
   UTIL_TIMER_Start(&CurrentSensorTimer);
   /* USER CODE END LoRaWAN_Init_2 */
 
@@ -451,10 +451,10 @@ static void CurrentSensorCallback(void *context)
 {
 
 	 GPIO_PinState pinState = HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_9);
-	 APP_LOG(TS_ON, VLEVEL_L, "Pin state: %d\r\n", pinState);
+//	 APP_LOG(TS_ON, VLEVEL_L, "Pin state: %d\r\n", pinState);
 
 	if(pinState == GPIO_PIN_SET){
-		 APP_LOG(TS_ON, VLEVEL_L, "Current detected! Sending pump ON uplink...\r\n");
+//		 APP_LOG(TS_ON, VLEVEL_L, "Current detected! Sending pump ON uplink...\r\n");
 		 AppData.Port = LORAWAN_USER_APP_PORT;
 		 AppData.BufferSize = 1;
 		 AppDataBuffer[0] = 0x01; // Pump ON
@@ -462,7 +462,7 @@ static void CurrentSensorCallback(void *context)
 	}
 	else if(pinState == GPIO_PIN_RESET)
 	{
-		 APP_LOG(TS_ON, VLEVEL_L, "No current! Sending pump OFF uplink...\r\n");
+//		 APP_LOG(TS_ON, VLEVEL_L, "No current! Sending pump OFF uplink...\r\n");
 		 AppData.Port = LORAWAN_USER_APP_PORT;
 		 AppData.BufferSize = 1;
 		 AppDataBuffer[0] = 0x00; // Pump OFF
@@ -482,41 +482,69 @@ static void CurrentSensorCallback(void *context)
 static void OnRxData(LmHandlerAppData_t *appData, LmHandlerRxParams_t *params)
 {
   /* USER CODE BEGIN OnRxData_1 */
-  if (params != NULL && appData != NULL && appData->Buffer != NULL && appData->BufferSize > 0)
+  if (params != NULL && appData != NULL && appData->Buffer != NULL && appData->BufferSize >= 1)
   {
     uint8_t command = appData->Buffer[0];
-    uint8_t duration = appData->Buffer[1];
-
 
     switch (command)
     {
       case 0x01:  // Pump ON
-        APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
-        pumpState = STATE_PUMP_ON;
-        PumpStateMachine(pumpState, 0);
+        if (pumpState != STATE_PUMP_ON)
+        {
+          APP_LOG(TS_ON, VLEVEL_M, "Command 0x01: Pump ON\r\n");
+          pumpState = STATE_PUMP_ON;
+          PumpStateMachine(pumpState, 0);
+        }
+        else
+        {
+          APP_LOG(TS_ON, VLEVEL_M, "Duplicate command: Pump already ON\r\n");
+        }
         break;
 
       case 0x02:  // Pump AUTO
-        APP_LOG(TS_ON, VLEVEL_M, "Command 0x02: Pump AUTO\r\n");
-        durationMinutes = duration;
-        APP_LOG(TS_ON, VLEVEL_M, "Duration: %d minute(s)\r\n", durationMinutes);
-        pumpState = STATE_AUTO;
-        PumpStateMachine(pumpState,durationMinutes);
+        if (appData->BufferSize >= 2)
+        {
+          uint8_t duration = appData->Buffer[1];
+
+            durationMinutes = duration;
+            APP_LOG(TS_ON, VLEVEL_M, "Command 0x02: Pump AUTO\r\n");
+            APP_LOG(TS_ON, VLEVEL_M, "Duration: %d minute(s)\r\n", durationMinutes);
+            pumpState = STATE_AUTO;
+            PumpStateMachine(pumpState, durationMinutes);
+
+        }
+        else
+        {
+          APP_LOG(TS_ON, VLEVEL_M, "Command 0x02 requires 2 bytes. Received only %d byte(s)\r\n", appData->BufferSize);
+        }
         break;
 
       case 0x03:  // Pump OFF
-        APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
-        pumpState = STATE_PUMP_OFF;
-        PumpStateMachine(pumpState, 0);
+        if (pumpState != STATE_PUMP_OFF)
+        {
+          APP_LOG(TS_ON, VLEVEL_M, "Command 0x03: Pump OFF\r\n");
+          pumpState = STATE_PUMP_OFF;
+          PumpStateMachine(pumpState, 0);
+        }
+        else
+        {
+          APP_LOG(TS_ON, VLEVEL_M, "Duplicate command: Pump already OFF\r\n");
+        }
         break;
+
 
       default:
         APP_LOG(TS_ON, VLEVEL_M, "Unknown command: 0x%02X\r\n", command);
         break;
     }
   }
+  else
+  {
+    APP_LOG(TS_ON, VLEVEL_M, "Invalid payload received (null or size 0)\r\n");
+  }
   /* USER CODE END OnRxData_1 */
 }
+
 
 static void SendTxData(void)
 {
